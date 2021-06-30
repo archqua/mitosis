@@ -31,6 +31,17 @@ void step_full(){
 	}
 }
 
+void step_full_new_hope(){
+	step_mt();
+	mt2bulk_boundary_condition();//with regularization
+	step_bulk();
+	conservatize();//????????? bulk2mt()?
+	if (t % each == 0){
+		stamp_bulk(outStreamBulk);
+		stamp_mt(outStreamMT);
+	}
+}
+
 
 int main(){
 	//read args
