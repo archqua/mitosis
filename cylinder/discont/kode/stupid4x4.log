@@ -1,0 +1,9 @@
+ht = 0.01, hr = 0.01, = 0.01
+simulation time = 0.03, radius = 0.04, length = 0.04
+MT radius = 0
+each 1'th step printed to stupid4x4_out.csv
+SOR omega = 1, relaxation stop epsilon = 1e-05
+maximum relaxations per timestep: 87
+initial conditions file: stupid4x4ic.scv
+jacobian mode: 0, reacions mode: 0
+directory with plots: new_hope_noreac_plots/

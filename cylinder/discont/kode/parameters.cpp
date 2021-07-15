@@ -1,20 +1,19 @@
+#include "parameters.hpp"
 #include <armadillo>
 #include <cmath>
+#include <functional>
+#include <iostream>
+#include <string>
 
-static double nepsilon=1e-05; //epsilon for newton iterations
-const int I=100;
-const int J=100;
-const double R=1;
-const double Z=1;
-const double RMT=0;
-const double hr=R/I;
-const double hz=Z/J;
-static double ht=1e-02;
-const int rmti=I*(RMT/R); //might require +-1 correction
-static double omega = 1;
-const double invomg = 1/omega;
-//const double altomg = 1 - invomg;
-const double altomg = omega - 1;
+namespace bulk {
+
+namespace dflt {
+	double ht = 1e-02, hr = 1e-02, hz = 1e-02;
+	double T = 1., R = 1., Z = 1.;
+	double omg = 1., eps = 1e-05;
+	double RMT = 0.;
+	int each = 1.;
+}
 
 const double kaf=0.042;
 const double kar=1;
@@ -33,9 +32,10 @@ const double alpha=1;
 //const double n0=1;
 double fgus(const int& i, const int& j, const double& sg=10, const double& mur=0, const double& muz=50){
 	//return std::exp(-0.5 * (std::pow(mur - i, 2) + std::pow(muz - j, 2)) / std::pow(sg, 2));
-	return 1;
+	return 0;
 }
-double n0(const int& i, const int& j){
+using Chromosome = std::function<double(int, int)>;
+double n0(int i, int j){
 	return fgus(i,j);
 }
 
@@ -60,23 +60,93 @@ const double j26_ = kneg + knegst;
 const double j33_ = - (kar + kac);
 const double j56_ = kneg + knegst;
 const double j66_ = - (2*kneg + kpos);
-//jacobian
-//arma::mat::fixed<6,6> ourJac(const arma::vec::fixed<6>& u){
-	//arma::mat res = {
-		//{0,0,0,0,0,0},
-		//{0,0,0,0,0,0},
-		//{0,0,0,0,0,0},
-		//{0,0,0,0,0,0},
-		//{0,0,0,0,0,0},
-		//{0,0,0,0,0,0}
-	//};
-	//return res;
-//}
 
-//double _knfan456(const arma::vec::fixed<6>& u, const int& i, const int& j){
+namespace mode {
+std::istream& operator>> (std::istream& is, Jacobian& j){
+	std::string prepre;
+	is >> prepre;
+	int pre;
+	if (prepre == "on"){
+		pre = 1;
+	} else if (prepre == "off"){
+		pre = 0;
+	} else {
+		try{
+			pre = std::stoi(prepre);
+		} catch (...) {
+			std::cerr << "couldn't convert " << prepre 
+				<< " to int(mode::Jacobian), defaulting to Jacobian::on" << std::endl;
+			pre = 1;
+		}
+	}
+	if (pre < 0 || pre > 1){
+		std::cerr << "unknown bulk::mode::Jacobian " << pre << ", defaulting to Jacobian::on" << std::endl;
+		pre = 1;
+	}
+	j = static_cast<Jacobian>(pre);
+	return is;
+}
+std::ostream& operator<< (std::ostream& os, const Jacobian& j){
+	os << static_cast<int>(j);
+	return os;
+}
+std::istream& operator>> (std::istream& is, Reactions& r){
+	std::string prepre;
+	is >> prepre;
+	int pre;
+	if (prepre == "on"){
+		pre = 1;
+	} else if (prepre == "off"){
+		pre = 0;
+	} else {
+		try{
+			pre = std::stoi(prepre);
+		} catch (...) {
+			std::cerr << "couldn't convert " << prepre 
+				<< " to int(mode::Reactions), defaulting to Reactions::on" << std::endl;
+			pre = 1;
+		}
+	}
+	if (pre < 0 || pre > 1){
+		std::cerr << "unknown bulk::mode::Reactions " << pre << ", defaulting to Reactions::on" << std::endl;
+		pre = 1;
+	}
+	r = static_cast<Reactions>(pre);
+	return is;
+}
+std::ostream& operator<< (std::ostream& os, const Reactions& r){
+	os << static_cast<int>(r);
+	return os;
+}
+}
+using Jacobian 
+	= std::function<
+		arma::mat::fixed<6,6>( const arma::vec::fixed<6>&
+				     , int , int 
+				     )
+	>;
+using RHS 
+	= std::function<
+		arma::vec::fixed<6>( const arma::vec::fixed<6>&
+				   , int, int )
+	>;
+//jacobian
+arma::mat::fixed<6,6> jac0(const arma::vec::fixed<6>& u, int i, int j){
+	arma::mat res = {
+		{0,0,0,0,0,0},
+		{0,0,0,0,0,0},
+		{0,0,0,0,0,0},
+		{0,0,0,0,0,0},
+		{0,0,0,0,0,0},
+		{0,0,0,0,0,0}
+	};
+	return res;
+}
+
+//double _knfan456(const arma::vec::fixed<6>& u, int i, int j){
 	//return knfn0(i,j) - knfal0*(u[3] + u[4] + u[5]);
 //}
-arma::mat::fixed<6,6> ourJac(const arma::vec::fixed<6>& u, const int& i, const int& j){
+arma::mat::fixed<6,6> jac1(const arma::vec::fixed<6>& u, int i, int j){
 	const double knfan456 = knfn0(i,j) - knfal0*(u[3] + u[4] + u[5]);
 	//const double knfan456 = _knfan456(u,i,j);
 	const double knfau1 = knfal0*u[0];
@@ -93,14 +163,15 @@ arma::mat::fixed<6,6> ourJac(const arma::vec::fixed<6>& u, const int& i, const i
 	};
 	return res;
 }
+const Jacobian jacs[2] = {jac0, jac1};
 
 //right hand side (chemical reactions)
-//arma::vec::fixed<6> rhs(const arma::vec::fixed<6>& u){
-	//arma::vec::fixed<6> res = {0,0,0,0,0,0};
-	//return res;
-//}
+arma::vec::fixed<6> rhs0(const arma::vec::fixed<6>& u, int i, int j){
+	arma::vec::fixed<6> res = {0,0,0,0,0,0};
+	return res;
+}
 
-arma::vec::fixed<6> rhs(const arma::vec::fixed<6>& u, const int& i, const int& j){
+arma::vec::fixed<6> rhs1(const arma::vec::fixed<6>& u, int i, int j){
 	const double kafu12=kaf*u[0]*u[1];
 	const double knfan456 = knfn0(i,j) - knfal0*(u[3] + u[4] + u[5]);
 	arma::vec::fixed<6> res = {
@@ -113,4 +184,6 @@ arma::vec::fixed<6> rhs(const arma::vec::fixed<6>& u, const int& i, const int& j
 	};
 	return res;
 }
+const RHS rhss[2] = {rhs0, rhs1};
 
+}

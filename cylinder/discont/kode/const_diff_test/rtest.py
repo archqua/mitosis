@@ -7,7 +7,7 @@ hr=0.01
 ht=0.01
 d=0.1
 zeros=_zeros(1, 100) #excludes 0
-m=3
+m=8
 zm=zeros[m-2]
 print("zm = %d\n" %zm)
 def bes(x):
@@ -15,13 +15,14 @@ def bes(x):
 def sol(r, t):
     return bes(zm*r) * math.exp(- d * zm**2 * t)
 
-folder = "pres/rdiff3/"
+#folder = "pres/rdiff3/"
+folder = ""
 const_diff_ic = open(folder + "rconst_diff_ic.scv", "w+")
 uss='\n'.join([';'.join(
                   [','.join(
                             map(str, [sol(i*hr, 0)] * 6)
-                                              ) for i in range(I)]
-                                                                  ) for j in range(J)])
+                    ) for i in range(I)]
+                ) for J in range(J)])
 const_diff_ic.write(uss)
 const_diff_ic.close()
 #print(bessel(1, zm))

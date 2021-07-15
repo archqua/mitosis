@@ -1,0 +1,9 @@
+ht = 0.01, hr = 0.01, = 0.01
+simulation time = 1, radius = 1, length = 1
+MT radius = 0
+each 10'th step printed to new_hope_noreac_out.csv
+SOR omega = 1, relaxation stop epsilon = 1e-05
+maximum relaxations per timestep: 101
+initial conditions file: const_diff_test/rconst_diff_ic.scv
+jacobian mode: 0, reacions mode: 0
+directory with plots: new_hope_noreac_plots/

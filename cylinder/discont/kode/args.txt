@@ -1,0 +1,3 @@
+-i rconst_diff_ic.scv -o new_hope_rout.csv -p new_hope_diffr/ --ht 0.005 -T 0.4 -w 1.5 --rmode off --jmode off
+-i zconst_diff_ic.scv -o new_hope_zout.csv -p new_hope_diffz/ --ht 0.005 -T 0.4 -w 1.5 --rmode off --jmode off
+-v -j 2

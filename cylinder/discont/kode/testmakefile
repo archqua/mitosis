@@ -1,0 +1,25 @@
+CXXFLAGS = -O3 --std=c++17 -pthread -Wall -Werror
+INCLUDES = -I/home/tor/gitlibs/gnuplot-iostream
+LIBS = -lboost_program_options -lboost_system -lboost_filesystem -lboost_iostreams -larmadillo
+OBJS = parameters.o simulation.o plottery.o testsim.o
+MAIN = t.out
+
+COMMAND = g++ $(CXXFLAGS) $(INCLUDES) $(LIBS)
+
+all: $(MAIN)
+
+$(MAIN): $(OBJS)
+	$(COMMAND) $(OBJS) -o $(MAIN)
+
+simulation.o: simulation.cpp simulation.hpp gri2hd.hpp parameters.hpp plottery.hpp
+	$(COMMAND) simulation.cpp -c
+
+plottery.o: plottery.cpp plottery.hpp gri2hd.hpp
+	$(COMMAND) plottery.cpp -c
+
+parameters.o: parameters.cpp parameters.hpp
+	$(COMMAND) parameters.cpp -c
+
+testsim.o: testsim.cpp simulation.hpp gri2hd.hpp parameters.hpp plottery.hpp
+	$(COMMAND) testsim.cpp -c
+

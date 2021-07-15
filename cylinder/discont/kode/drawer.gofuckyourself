@@ -1,0 +1,31 @@
+#include "drawer.hpp"
+
+#include <fstream>
+#include <utility>
+
+using namespace std;
+
+namespace draw {
+
+const char* contourHalfTheScreenPreamble
+    /* my screen resolution */
+  = "set term png size 1920, 1080\n"
+    /* contour takes half of the screen */
+    "set size 0.5, 1\n"
+    "set contour\n"
+    "unset surface\n"
+    "set view map\n"
+    /* don't quite get all the detail */
+    "splot '-' using 1:2:3 with lines\n"
+    ;
+
+const vector<const char*> cylContSliPreambles = { contourHalfTheScreenPreamble };
+
+CylContourWithSlices::CylContourWithSlices
+  (Gri2hd<double> copy)
+  : preambles(cylContSliPreambles)
+  , datas({ move(copy) })
+{}
+
+
+}
